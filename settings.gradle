@@ -1,0 +1,2 @@
+rootProject.name = "AITrimmerTwitch"
+include("backend", "frontend")

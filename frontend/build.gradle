@@ -1,0 +1,32 @@
+plugins {
+    id 'base'
+}
+
+ext {
+    npmCommand = System.getProperty('os.name').toLowerCase().contains('win') ? 'npm.cmd' : 'npm'
+}
+
+tasks.register('npmInstall', Exec) {
+    group = 'build'
+    description = 'Install frontend dependencies'
+    commandLine npmCommand, 'install'
+    workingDir = projectDir
+    ignoreExitValue = true
+}
+
+tasks.register('npmBuild', Exec) {
+    group = 'build'
+    description = 'Build the frontend assets'
+    commandLine npmCommand, 'run', 'build'
+    workingDir = projectDir
+    ignoreExitValue = true
+    dependsOn 'npmInstall'
+}
+
+tasks.named('build') {
+    dependsOn 'npmBuild'
+}
+
+tasks.named('clean') {
+    delete layout.buildDirectory
+}
