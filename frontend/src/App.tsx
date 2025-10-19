@@ -1,0 +1,415 @@
+import type { FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { api, type TaskStatusAction } from './api';
+import type {
+  CreateTaskPayload,
+  GeneralConfig,
+  Quality,
+  Task,
+  TaskSegment,
+  TaskStatus,
+} from './types';
+import './App.css';
+
+const statusLabels: Record<TaskStatus, string> = {
+  PENDING_APPROVAL: '等待審核',
+  APPROVED: '已批准',
+  RUNNING: '執行中',
+  PAUSED: '已暫停',
+  CANCELLED: '已取消',
+  COMPLETED: '已完成',
+  FAILED: '執行失敗',
+};
+
+const statusActions: Array<{
+  action: TaskStatusAction;
+  label: string;
+  color: 'primary' | 'warning' | 'danger' | 'neutral';
+  available: (status: TaskStatus) => boolean;
+}> = [
+  {
+    action: 'approve',
+    label: '批准',
+    color: 'primary',
+    available: (status) => status === 'PENDING_APPROVAL',
+  },
+  {
+    action: 'running',
+    label: '標記執行',
+    color: 'primary',
+    available: (status) => status === 'APPROVED' || status === 'PAUSED',
+  },
+  {
+    action: 'pause',
+    label: '暫停',
+    color: 'warning',
+    available: (status) => status === 'RUNNING',
+  },
+  {
+    action: 'completed',
+    label: '完成',
+    color: 'neutral',
+    available: (status) => status === 'RUNNING' || status === 'APPROVED',
+  },
+  {
+    action: 'failed',
+    label: '標記失敗',
+    color: 'danger',
+    available: (status) => status === 'RUNNING',
+  },
+  {
+    action: 'cancel',
+    label: '取消',
+    color: 'danger',
+    available: (status) =>
+      status === 'PENDING_APPROVAL' ||
+      status === 'APPROVED' ||
+      status === 'PAUSED',
+  },
+];
+
+const initialSegment: TaskSegment = { start: '00:00:00', end: '00:00:30' };
+
+function App() {
+  const [qualities, setQualities] = useState<Quality[]>([]);
+  const [generalConfig, setGeneralConfig] = useState<GeneralConfig | null>(
+    null,
+  );
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [segments, setSegments] = useState<TaskSegment[]>([initialSegment]);
+  const [videoName, setVideoName] = useState('');
+  const [quality, setQuality] = useState('');
+  const [autoApprove, setAutoApprove] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void bootstrap();
+  }, []);
+
+  const defaultQuality = useMemo(
+    () => quality || qualities.at(0)?.name || '',
+    [quality, qualities],
+  );
+
+  async function bootstrap() {
+    try {
+      const [qualitiesData, configData, tasksData] = await Promise.all([
+        api.getQualities(),
+        api.getGeneralConfig(),
+        api.getTasks(),
+      ]);
+      setQualities(qualitiesData);
+      setGeneralConfig(configData);
+      setTasks(tasksData);
+      if (!quality && qualitiesData.length > 0) {
+        setQuality(qualitiesData[0].name);
+      }
+    } catch (err) {
+      handleError(err);
+    }
+  }
+
+  function updateSegment(
+    index: number,
+    field: keyof TaskSegment,
+    value: string,
+  ) {
+    setSegments((prev) =>
+      prev.map((segment, idx) =>
+        idx === index ? { ...segment, [field]: value } : segment,
+      ),
+    );
+  }
+
+  function addSegment() {
+    setSegments((prev) => [...prev, { start: '00:00:00', end: '00:00:30' }]);
+  }
+
+  function removeSegment(index: number) {
+    setSegments((prev) => prev.filter((_, idx) => idx !== index));
+  }
+
+  async function submitTask(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+
+    const payload: CreateTaskPayload = {
+      videoName,
+      quality: defaultQuality,
+      autoApprove,
+      segments,
+    };
+
+    try {
+      const created = await api.createTask(payload);
+      setTasks((prev) => [created, ...prev.filter((task) => task.id !== created.id)]);
+      setMessage(`任務建立成功：${created.id}`);
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function changeStatus(id: string, action: TaskStatusAction) {
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const updated = await api.updateTaskStatus(id, action);
+      setTasks((prev) =>
+        prev.map((task) => (task.id === id ? updated : task)),
+      );
+      setMessage(`狀態已更新為：${statusLabels[updated.status]}`);
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleError(err: unknown) {
+    if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError('發生未知錯誤，請稍後再試。');
+    }
+  }
+
+  function resetForm() {
+    setVideoName('');
+    setSegments([initialSegment]);
+    setAutoApprove(false);
+    if (qualities.length > 0) {
+      setQuality(qualities[0].name);
+    }
+  }
+
+  return (
+    <div className="app">
+      <header className="app__header">
+        <h1>AITrimmerTwitch 任務控制台</h1>
+        <p>建立、審核並執行 AI 裁剪任務。</p>
+      </header>
+
+      {generalConfig && (
+        <section className="card">
+          <h2>當前系統配置</h2>
+          <div className="config-grid">
+            <div>
+              <span className="config-label">工作資料夾</span>
+              <code>{generalConfig.workspacePath}</code>
+            </div>
+            <div>
+              <span className="config-label">FFmpeg 位置</span>
+              <code>{generalConfig.ffmpegBinary}</code>
+            </div>
+            <div>
+              <span className="config-label">輸出前綴</span>
+              <code>{generalConfig.outputPrefix}</code>
+            </div>
+            <div>
+              <span className="config-label">禁止重複編輯</span>
+              <code>{generalConfig.lockEditedOutputs ? '是' : '否'}</code>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="card">
+        <div className="card__header">
+          <h2>建立新任務</h2>
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={resetForm}
+          >
+            重置表單
+          </button>
+        </div>
+        <form className="task-form" onSubmit={submitTask}>
+          <label className="form-field">
+            <span>影片名稱（位於工作資料夾）</span>
+            <input
+              type="text"
+              required
+              value={videoName}
+              onChange={(event) => setVideoName(event.target.value)}
+              placeholder="example.mp4"
+            />
+          </label>
+
+          <label className="form-field">
+            <span>畫質設定</span>
+            <select
+              value={defaultQuality}
+              onChange={(event) => setQuality(event.target.value)}
+            >
+              {qualities.map((item) => (
+                <option key={item.name} value={item.name}>
+                  {item.name}（{item.videoBitrate} / {item.audioBitrate}）
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="form-checkbox">
+            <input
+              type="checkbox"
+              checked={autoApprove}
+              onChange={(event) => setAutoApprove(event.target.checked)}
+            />
+            建立後自動標記為已批准
+          </label>
+
+          <div>
+            <div className="segments-header">
+              <span>時間片段（HH:mm:ss 或 mm:ss）</span>
+              <button
+                type="button"
+                className="button button--ghost"
+                onClick={addSegment}
+              >
+                新增片段
+              </button>
+            </div>
+            <div className="segments-list">
+              {segments.map((segment, index) => (
+                <div key={index} className="segment-row">
+                  <input
+                    type="text"
+                    required
+                    value={segment.start}
+                    onChange={(event) =>
+                      updateSegment(index, 'start', event.target.value)
+                    }
+                    placeholder="開始 00:00:00"
+                  />
+                  <input
+                    type="text"
+                    required
+                    value={segment.end}
+                    onChange={(event) =>
+                      updateSegment(index, 'end', event.target.value)
+                    }
+                    placeholder="結束 00:00:30"
+                  />
+                  {segments.length > 1 && (
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      onClick={() => removeSegment(index)}
+                    >
+                      移除
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="button button--primary"
+            disabled={loading}
+          >
+            {loading ? '處理中...' : '送出任務'}
+          </button>
+        </form>
+
+        {message && <p className="feedback feedback--success">{message}</p>}
+        {error && <p className="feedback feedback--error">{error}</p>}
+      </section>
+
+      <section className="card">
+        <div className="card__header">
+          <h2>任務列表</h2>
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={() => void bootstrap()}
+          >
+            重新整理
+          </button>
+        </div>
+        {tasks.length === 0 ? (
+          <p>尚未建立任務。</p>
+        ) : (
+          <div className="tasks">
+            {tasks.map((task) => (
+              <article key={task.id} className="task-card">
+                <header className="task-card__header">
+                  <div>
+                    <h3>{task.videoName}</h3>
+                    <span className={`status status--${task.status.toLowerCase()}`}>
+                      {statusLabels[task.status]}
+                    </span>
+                  </div>
+                  <span className="task-card__meta">
+                    建立於 {formatDate(task.createdAt)}
+                  </span>
+                </header>
+                <div className="task-card__body">
+                  <div className="task-info">
+                    <div>
+                      <span className="info-label">畫質</span>
+                      <code>{task.quality}</code>
+                    </div>
+                    <div>
+                      <span className="info-label">輸出檔名</span>
+                      <code>{task.outputFileName}</code>
+                    </div>
+                    <div>
+                      <span className="info-label">片段</span>
+                      <ul>
+                        {task.segments.map((segment, index) => (
+                          <li key={index}>
+                            {segment.start} → {segment.end}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="task-actions">
+                    {statusActions
+                      .filter(({ available }) => available(task.status))
+                      .map(({ action, label, color }) => (
+                        <button
+                          key={action}
+                          type="button"
+                          className={`button button--${color}`}
+                          disabled={loading}
+                          onClick={() => void changeStatus(task.id, action)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+                <div className="task-card__commands">
+                  <span>FFmpeg 指令預覽</span>
+                  <pre>
+                    <code>{task.executionPreview.join('\n\n')}</code>
+                  </pre>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat('zh-TW', {
+    dateStyle: 'short',
+    timeStyle: 'medium',
+  }).format(new Date(value));
+}
+
+export default App;

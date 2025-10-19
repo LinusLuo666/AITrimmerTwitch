@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: ai-trimmer-backend
+  ai:
+    openai:
+      api-key: ${SPRING_AI_OPENAI_API_KEY:placeholder}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.openai.com}
+
+video:
+  processor:
+    workspace-path: "C:/AITrimmer/workspace"
+    ffmpeg-binary: "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
+    output-prefix: "AITRIM_"
+    lock-edited-outputs: true
+    qualities:
+      low:
+        video-bitrate: "1500k"
+        audio-bitrate: "96k"
+        preset: veryfast
+        crf: 28
+      medium:
+        video-bitrate: "3500k"
+        audio-bitrate: "128k"
+        preset: medium
+        crf: 23
+      high:
+        video-bitrate: "6000k"
+        audio-bitrate: "192k"
+        preset: slow
+        crf: 20
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
