@@ -65,6 +65,12 @@ npm run dev
 
 打开浏览器访问 `http://localhost:5173`，即可使用任务控制台创建与管理任务。
 
+### 配置集中管理
+
+- **后端**：所有运行参数集中在 `backend/src/main/resources/app-config.example.yml`。将该文件复制为 `app-config.yml` 并按需修改即可覆盖默认值；也可改用环境变量（`APP_WORKSPACE_PATH`、`APP_FFMPEG_PATH` 等）统一管理。
+- **前端**：`frontend/.env.example` 提供 `VITE_API_BASE_URL` 等配置示例，可复制为 `.env` 后修改。
+- **Gradle/JVM**：若需调整 JVM 内存或代理，在 `backend/gradle.properties` 调整即可。
+
 ### 聊天创建任务
 
 前端控制台提供简易聊天窗口，可通过约定格式的消息自动生成裁剪任务。示例指令：

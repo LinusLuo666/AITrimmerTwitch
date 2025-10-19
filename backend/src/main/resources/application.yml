@@ -1,6 +1,8 @@
 spring:
   application:
     name: ai-trimmer-backend
+  config:
+    import: optional:classpath:app-config.yml
   ai:
     openai:
       api-key: ${SPRING_AI_OPENAI_API_KEY:placeholder}
@@ -8,26 +10,26 @@ spring:
 
 video:
   processor:
-    workspace-path: "C:/AITrimmer/workspace"
-    ffmpeg-binary: "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
-    output-prefix: "AITRIM_"
-    lock-edited-outputs: true
+    workspace-path: ${APP_WORKSPACE_PATH:"C:/AITrimmer/workspace"}
+    ffmpeg-binary: ${APP_FFMPEG_PATH:"C:/Program Files/ffmpeg/bin/ffmpeg.exe"}
+    output-prefix: ${APP_OUTPUT_PREFIX:"AITRIM_"}
+    lock-edited-outputs: ${APP_LOCK_EDITED_OUTPUTS:true}
     qualities:
       low:
-        video-bitrate: "1500k"
-        audio-bitrate: "96k"
-        preset: veryfast
-        crf: 28
+        video-bitrate: ${APP_QUALITY_LOW_VIDEO_BITRATE:"1500k"}
+        audio-bitrate: ${APP_QUALITY_LOW_AUDIO_BITRATE:"96k"}
+        preset: ${APP_QUALITY_LOW_PRESET:veryfast}
+        crf: ${APP_QUALITY_LOW_CRF:28}
       medium:
-        video-bitrate: "3500k"
-        audio-bitrate: "128k"
-        preset: medium
-        crf: 23
+        video-bitrate: ${APP_QUALITY_MEDIUM_VIDEO_BITRATE:"3500k"}
+        audio-bitrate: ${APP_QUALITY_MEDIUM_AUDIO_BITRATE:"128k"}
+        preset: ${APP_QUALITY_MEDIUM_PRESET:medium}
+        crf: ${APP_QUALITY_MEDIUM_CRF:23}
       high:
-        video-bitrate: "6000k"
-        audio-bitrate: "192k"
-        preset: slow
-        crf: 20
+        video-bitrate: ${APP_QUALITY_HIGH_VIDEO_BITRATE:"6000k"}
+        audio-bitrate: ${APP_QUALITY_HIGH_AUDIO_BITRATE:"192k"}
+        preset: ${APP_QUALITY_HIGH_PRESET:slow}
+        crf: ${APP_QUALITY_HIGH_CRF:20}
 
 management:
   endpoints:

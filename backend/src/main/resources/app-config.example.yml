@@ -1,0 +1,31 @@
+# 将此文件复制为 app-config.yml 并按需修改，即可覆盖默认配置。
+# 也可以通过环境变量（见 application.yml 中的 APP_* 占位）覆盖相同属性。
+
+video:
+  processor:
+    workspace-path: "D:/Videos/workspace"
+    ffmpeg-binary: "D:/Tools/ffmpeg/bin/ffmpeg.exe"
+    output-prefix: "AITRIM_"
+    lock-edited-outputs: true
+    qualities:
+      low:
+        video-bitrate: "1500k"
+        audio-bitrate: "96k"
+        preset: veryfast
+        crf: 28
+      medium:
+        video-bitrate: "3500k"
+        audio-bitrate: "128k"
+        preset: medium
+        crf: 23
+      high:
+        video-bitrate: "6000k"
+        audio-bitrate: "192k"
+        preset: slow
+        crf: 20
+
+spring:
+  ai:
+    openai:
+      api-key: "placeholder"
+      base-url: "https://api.openai.com"
