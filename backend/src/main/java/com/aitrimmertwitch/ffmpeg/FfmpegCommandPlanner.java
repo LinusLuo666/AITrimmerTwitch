@@ -14,7 +14,7 @@ import com.aitrimmertwitch.model.TaskSegment;
 import com.aitrimmertwitch.model.VideoEditTask;
 
 /**
- * 根據任務內容產生對應的 FFmpeg 指令腳本（僅供審核）。
+ * 根据任务内容生成对应的 FFmpeg 命令脚本（仅供审核）。
  */
 @Component
 public class FfmpegCommandPlanner {

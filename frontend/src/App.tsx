@@ -12,13 +12,13 @@ import type {
 import './App.css';
 
 const statusLabels: Record<TaskStatus, string> = {
-  PENDING_APPROVAL: '等待審核',
+  PENDING_APPROVAL: '等待审核',
   APPROVED: '已批准',
-  RUNNING: '執行中',
-  PAUSED: '已暫停',
+  RUNNING: '执行中',
+  PAUSED: '已暂停',
   CANCELLED: '已取消',
   COMPLETED: '已完成',
-  FAILED: '執行失敗',
+  FAILED: '执行失败',
 };
 
 const statusActions: Array<{
@@ -35,13 +35,13 @@ const statusActions: Array<{
   },
   {
     action: 'running',
-    label: '標記執行',
+    label: '标记执行',
     color: 'primary',
     available: (status) => status === 'APPROVED' || status === 'PAUSED',
   },
   {
     action: 'pause',
-    label: '暫停',
+    label: '暂停',
     color: 'warning',
     available: (status) => status === 'RUNNING',
   },
@@ -53,7 +53,7 @@ const statusActions: Array<{
   },
   {
     action: 'failed',
-    label: '標記失敗',
+    label: '标记失败',
     color: 'danger',
     available: (status) => status === 'RUNNING',
   },
@@ -147,7 +147,7 @@ function App() {
     try {
       const created = await api.createTask(payload);
       setTasks((prev) => [created, ...prev.filter((task) => task.id !== created.id)]);
-      setMessage(`任務建立成功：${created.id}`);
+      setMessage(`任务创建成功：${created.id}`);
     } catch (err) {
       handleError(err);
     } finally {
@@ -164,7 +164,7 @@ function App() {
       setTasks((prev) =>
         prev.map((task) => (task.id === id ? updated : task)),
       );
-      setMessage(`狀態已更新為：${statusLabels[updated.status]}`);
+      setMessage(`状态已更新为：${statusLabels[updated.status]}`);
     } catch (err) {
       handleError(err);
     } finally {
@@ -176,7 +176,7 @@ function App() {
     if (err instanceof Error) {
       setError(err.message);
     } else {
-      setError('發生未知錯誤，請稍後再試。');
+      setError('发生未知错误，请稍后再试。');
     }
   }
 
@@ -192,28 +192,28 @@ function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1>AITrimmerTwitch 任務控制台</h1>
-        <p>建立、審核並執行 AI 裁剪任務。</p>
+        <h1>AITrimmerTwitch 任务控制台</h1>
+        <p>创建、审核并执行 AI 裁剪任务。</p>
       </header>
 
       {generalConfig && (
         <section className="card">
-          <h2>當前系統配置</h2>
+          <h2>当前系统配置</h2>
           <div className="config-grid">
             <div>
-              <span className="config-label">工作資料夾</span>
+              <span className="config-label">工作目录</span>
               <code>{generalConfig.workspacePath}</code>
             </div>
             <div>
-              <span className="config-label">FFmpeg 位置</span>
+              <span className="config-label">FFmpeg 路径</span>
               <code>{generalConfig.ffmpegBinary}</code>
             </div>
             <div>
-              <span className="config-label">輸出前綴</span>
+              <span className="config-label">输出前缀</span>
               <code>{generalConfig.outputPrefix}</code>
             </div>
             <div>
-              <span className="config-label">禁止重複編輯</span>
+              <span className="config-label">禁止重复编辑</span>
               <code>{generalConfig.lockEditedOutputs ? '是' : '否'}</code>
             </div>
           </div>
@@ -222,18 +222,18 @@ function App() {
 
       <section className="card">
         <div className="card__header">
-          <h2>建立新任務</h2>
+          <h2>创建新任务</h2>
           <button
             type="button"
             className="button button--ghost"
             onClick={resetForm}
           >
-            重置表單
+            重置表单
           </button>
         </div>
         <form className="task-form" onSubmit={submitTask}>
           <label className="form-field">
-            <span>影片名稱（位於工作資料夾）</span>
+            <span>视频名称（位于工作目录）</span>
             <input
               type="text"
               required
@@ -244,7 +244,7 @@ function App() {
           </label>
 
           <label className="form-field">
-            <span>畫質設定</span>
+            <span>画质档位</span>
             <select
               value={defaultQuality}
               onChange={(event) => setQuality(event.target.value)}
@@ -263,12 +263,12 @@ function App() {
               checked={autoApprove}
               onChange={(event) => setAutoApprove(event.target.checked)}
             />
-            建立後自動標記為已批准
+            创建后自动标记为已批准
           </label>
 
           <div>
             <div className="segments-header">
-              <span>時間片段（HH:mm:ss 或 mm:ss）</span>
+              <span>时间片段（HH:mm:ss 或 mm:ss）</span>
               <button
                 type="button"
                 className="button button--ghost"
@@ -287,7 +287,7 @@ function App() {
                     onChange={(event) =>
                       updateSegment(index, 'start', event.target.value)
                     }
-                    placeholder="開始 00:00:00"
+                    placeholder="开始 00:00:00"
                   />
                   <input
                     type="text"
@@ -296,7 +296,7 @@ function App() {
                     onChange={(event) =>
                       updateSegment(index, 'end', event.target.value)
                     }
-                    placeholder="結束 00:00:30"
+                    placeholder="结束 00:00:30"
                   />
                   {segments.length > 1 && (
                     <button
@@ -317,7 +317,7 @@ function App() {
             className="button button--primary"
             disabled={loading}
           >
-            {loading ? '處理中...' : '送出任務'}
+            {loading ? '处理中...' : '提交任务'}
           </button>
         </form>
 
@@ -327,17 +327,17 @@ function App() {
 
       <section className="card">
         <div className="card__header">
-          <h2>任務列表</h2>
+          <h2>任务列表</h2>
           <button
             type="button"
             className="button button--ghost"
             onClick={() => void bootstrap()}
           >
-            重新整理
+            重新加载
           </button>
         </div>
         {tasks.length === 0 ? (
-          <p>尚未建立任務。</p>
+          <p>尚未创建任务。</p>
         ) : (
           <div className="tasks">
             {tasks.map((task) => (
@@ -350,17 +350,17 @@ function App() {
                     </span>
                   </div>
                   <span className="task-card__meta">
-                    建立於 {formatDate(task.createdAt)}
+                    创建于 {formatDate(task.createdAt)}
                   </span>
                 </header>
                 <div className="task-card__body">
                   <div className="task-info">
                     <div>
-                      <span className="info-label">畫質</span>
+                      <span className="info-label">画质</span>
                       <code>{task.quality}</code>
                     </div>
                     <div>
-                      <span className="info-label">輸出檔名</span>
+                      <span className="info-label">输出文件名</span>
                       <code>{task.outputFileName}</code>
                     </div>
                     <div>
@@ -391,7 +391,7 @@ function App() {
                   </div>
                 </div>
                 <div className="task-card__commands">
-                  <span>FFmpeg 指令預覽</span>
+                  <span>FFmpeg 命令预览</span>
                   <pre>
                     <code>{task.executionPreview.join('\n\n')}</code>
                   </pre>
@@ -406,7 +406,7 @@ function App() {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('zh-TW', {
+  return new Intl.DateTimeFormat('zh-CN', {
     dateStyle: 'short',
     timeStyle: 'medium',
   }).format(new Date(value));

@@ -93,7 +93,7 @@ public class TaskService {
 
 	private VideoEditTask updateStatus(UUID id, TaskStatus status) {
 		VideoEditTask task = repository.findById(id)
-			.orElseThrow(() -> new IllegalArgumentException("找不到指定任務：" + id));
+			.orElseThrow(() -> new IllegalArgumentException("找不到指定任务：" + id));
 		task.setStatus(status);
 		task.markUpdated();
 		repository.save(task);
@@ -102,36 +102,36 @@ public class TaskService {
 
 	private void validateVideoName(String videoName) {
 		if (!StringUtils.hasText(videoName)) {
-			throw new IllegalArgumentException("影片名稱不可為空");
+			throw new IllegalArgumentException("视频名称不能为空");
 		}
 
 		Path workspace = properties.getWorkspacePath().toAbsolutePath().normalize();
 
 		Path resolved = workspace.resolve(videoName).normalize();
 		if (!resolved.startsWith(workspace)) {
-			throw new IllegalArgumentException("影片名稱包含非法路徑片段：" + videoName);
+			throw new IllegalArgumentException("视频名称包含非法路径片段：" + videoName);
 		}
 
 		if (properties.isLockEditedOutputs() && videoName.startsWith(properties.getOutputPrefix())) {
-			throw new IllegalArgumentException("偵測到已處理過的輸出檔案，為避免重複編輯已拒絕此次操作。");
+			throw new IllegalArgumentException("检测到已处理过的输出文件，为避免重复编辑已拒绝此次操作。");
 		}
 
 		if (!Files.exists(resolved)) {
-			throw new IllegalArgumentException("工作區內找不到指定影片：" + resolved);
+			throw new IllegalArgumentException("工作目录内找不到指定视频：" + resolved);
 		}
 	}
 
 	private void validateSegments(List<TaskSegment> segments) {
 		if (segments.isEmpty()) {
-			throw new IllegalArgumentException("至少需要配置一個時間片段。");
+			throw new IllegalArgumentException("至少需要配置一个时间片段。");
 		}
 		for (TaskSegment segment : segments) {
 			Duration start = segment.startAsDuration();
 			Duration end = segment.endAsDuration();
-			if (!end.minus(start).isPositive()) {
-				throw new IllegalArgumentException(
-						"時間片段結束時間必須晚於開始時間：" + segment.getStart() + " -> " + segment.getEnd());
-			}
+				if (!end.minus(start).isPositive()) {
+					throw new IllegalArgumentException(
+							"时间片段结束时间必须晚于开始时间：" + segment.getStart() + " -> " + segment.getEnd());
+				}
 		}
 	}
 }

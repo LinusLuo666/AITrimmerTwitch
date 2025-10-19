@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 任務核心資料模型。
+ * 任务核心数据模型。
  */
 public class VideoEditTask {
 
@@ -139,11 +139,11 @@ public class VideoEditTask {
 	}
 
 	public void ensureIntegrity() {
-		Objects.requireNonNull(id, "任務 id 不可為 null");
-		Objects.requireNonNull(sourceVideoName, "sourceVideoName 不可為 null");
-		Objects.requireNonNull(status, "status 不可為 null");
-		Objects.requireNonNull(createdAt, "createdAt 不可為 null");
-		Objects.requireNonNull(updatedAt, "updatedAt 不可為 null");
+		Objects.requireNonNull(id, "任务 id 不可为 null");
+		Objects.requireNonNull(sourceVideoName, "sourceVideoName 不可为 null");
+		Objects.requireNonNull(status, "status 不可为 null");
+		Objects.requireNonNull(createdAt, "createdAt 不可为 null");
+		Objects.requireNonNull(updatedAt, "updatedAt 不可为 null");
 	}
 
 }

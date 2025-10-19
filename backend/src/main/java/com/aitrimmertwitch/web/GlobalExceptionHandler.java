@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 			.stream()
 			.findFirst()
 			.map(error -> error.getField() + ": " + error.getDefaultMessage())
-			.orElse("資料驗證失敗");
+			.orElse("数据校验失败");
 		return ResponseEntity.badRequest().body(errorBody(HttpStatus.BAD_REQUEST, message));
 	}
 

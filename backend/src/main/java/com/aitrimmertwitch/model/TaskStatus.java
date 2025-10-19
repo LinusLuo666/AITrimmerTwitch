@@ -1,7 +1,7 @@
 package com.aitrimmertwitch.model;
 
 /**
- * 描述任務目前所處的生命週期狀態。
+ * 描述任务所处的生命周期状态。
  */
 public enum TaskStatus {
 	PENDING_APPROVAL,

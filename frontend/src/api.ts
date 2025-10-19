@@ -24,7 +24,7 @@ async function request<T>(input: string, init?: RequestInit): Promise<T> {
         message = body.message;
       }
     } catch {
-      // 忽略解析錯誤，保留原始訊息
+      // 忽略解析错误，保留原始信息
     }
     throw new Error(message);
   }

@@ -98,7 +98,7 @@ public class FileTaskRepository implements TaskRepository {
 			}
 		}
 		catch (IOException ex) {
-			log.warn("讀取任務存檔失敗，將重新建立空白儲存。", ex);
+			log.warn("读取任务存档失败，将重新建立空白存储。", ex);
 		}
 		finally {
 			lock.writeLock().unlock();
@@ -114,8 +114,8 @@ public class FileTaskRepository implements TaskRepository {
 			mapper.writerWithDefaultPrettyPrinter().writeValue(storageFile.toFile(), store.values());
 		}
 		catch (IOException ex) {
-			log.error("寫入任務存檔失敗：{}", storageFile, ex);
-			throw new IllegalStateException("無法寫入任務存檔", ex);
+			log.error("写入任务存档失败：{}", storageFile, ex);
+			throw new IllegalStateException("无法写入任务存档", ex);
 		}
 	}
 

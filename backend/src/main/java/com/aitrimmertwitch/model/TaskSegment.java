@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 任務中的單一時間片段。以 HH:mm:ss 或 mm:ss 格式表示。
+ * 任务中的单一时间片段，以 HH:mm:ss 或 mm:ss 格式表示。
  */
 public class TaskSegment {
 
@@ -50,7 +50,7 @@ public class TaskSegment {
 	}
 
 	private Duration parseTimecode(String value) {
-		Objects.requireNonNull(value, "timecode 不可為 null");
+		Objects.requireNonNull(value, "timecode 不可为 null");
 		try {
 			if (value.contains(":")) {
 				String[] parts = value.split(":");
@@ -66,7 +66,7 @@ public class TaskSegment {
 			return Duration.ofSeconds(Long.parseLong(value));
 		}
 		catch (NumberFormatException ex) {
-			throw new DateTimeParseException("無法解析時間碼：" + value, value, 0, ex);
+			throw new DateTimeParseException("无法解析时间码：" + value, value, 0, ex);
 		}
 	}
 }

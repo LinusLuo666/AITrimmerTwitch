@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.aitrimmertwitch'
 version = '0.0.1-SNAPSHOT'
-description = 'AI 驅動的 Twitch 影片裁剪任務後端'
+description = 'AI 驱动的 Twitch 视频裁剪任务后端'
 
 java {
 	toolchain {

@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * 管理與工作區、輸出前綴、FFmpeg 配置相關的可調整參數。
+ * 管理与工作区、输出前缀、FFmpeg 配置相关的可调整参数。
  */
 @Validated
 @ConfigurationProperties(prefix = "video.processor")
@@ -78,7 +78,7 @@ public class VideoProcessorProperties {
 	public QualityProfile requireQuality(String name) {
 		QualityProfile profile = qualities.get(name);
 		if (profile == null) {
-			throw new IllegalArgumentException("未找到畫質配置：" + name);
+			throw new IllegalArgumentException("未找到画质配置：" + name);
 		}
 		return profile;
 	}
@@ -86,9 +86,9 @@ public class VideoProcessorProperties {
 	public record QualityProfile(String videoBitrate, String audioBitrate, String preset, Integer crf) {
 
 		public QualityProfile {
-			Objects.requireNonNull(videoBitrate, "videoBitrate 不可為 null");
-			Objects.requireNonNull(audioBitrate, "audioBitrate 不可為 null");
-			Objects.requireNonNull(preset, "preset 不可為 null");
+			Objects.requireNonNull(videoBitrate, "videoBitrate 不可为 null");
+			Objects.requireNonNull(audioBitrate, "audioBitrate 不可为 null");
+			Objects.requireNonNull(preset, "preset 不可为 null");
 		}
 	}
 
