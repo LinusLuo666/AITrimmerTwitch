@@ -70,6 +70,13 @@ const statusActions: Array<{
 
 const initialSegment: TaskSegment = { start: '00:00:00', end: '00:00:30' };
 
+type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+  task?: Task | null;
+  timestamp: string;
+};
+
 function App() {
   const [qualities, setQualities] = useState<Quality[]>([]);
   const [generalConfig, setGeneralConfig] = useState<GeneralConfig | null>(
@@ -83,6 +90,16 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => [
+    {
+      role: 'assistant',
+      content:
+        '请按照“视频=demo.mp4; 片段=00:00:05-00:00:30; 画质=medium; 自动批准=true”的格式发送指令，我会帮你生成裁剪任务。',
+      timestamp: new Date().toISOString(),
+    },
+  ]);
 
   useEffect(() => {
     void bootstrap();
@@ -172,6 +189,52 @@ function App() {
     }
   }
 
+  async function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const content = chatInput.trim();
+    if (!content) {
+      return;
+    }
+
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content,
+      timestamp: new Date().toISOString(),
+    };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput('');
+    setChatLoading(true);
+
+    try {
+      const response = await api.sendChatMessage(content);
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: response.reply,
+        task: response.task ?? null,
+        timestamp: new Date().toISOString(),
+      };
+      setChatMessages((prev) => [...prev, assistantMessage]);
+      if (response.task) {
+        const task = response.task;
+        setTasks((prev) => [
+          task,
+          ...prev.filter((item) => item.id !== task.id),
+        ]);
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : '发生未知错误，请稍后再试。';
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: message,
+        timestamp: new Date().toISOString(),
+      };
+      setChatMessages((prev) => [...prev, assistantMessage]);
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
   function handleError(err: unknown) {
     if (err instanceof Error) {
       setError(err.message);
@@ -195,6 +258,53 @@ function App() {
         <h1>AITrimmerTwitch 任务控制台</h1>
         <p>创建、审核并执行 AI 裁剪任务。</p>
       </header>
+
+      <section className="card chat">
+        <div className="chat__header">
+          <h2>聊天指令</h2>
+          <p>使用约定格式描述需求，我会尝试自动生成裁剪任务。</p>
+        </div>
+        <div className="chat__hint">
+          示例：<code>视频=highlight.mp4; 片段=00:00:05-00:00:30,00:01:00-00:02:00; 画质=high; 自动批准=true</code>
+        </div>
+        <div className="chat__messages">
+          {chatMessages.map((item, index) => (
+            <div
+              key={`${item.timestamp}-${index}`}
+              className={`chat-bubble chat-bubble--${item.role}`}
+            >
+              <div className="chat-bubble__meta">
+                <span>{item.role === 'user' ? '你' : 'AI'}</span>
+                <span>{formatTime(item.timestamp)}</span>
+              </div>
+              <p>{item.content}</p>
+              {item.task && (
+                <div className="chat-bubble__task">
+                  <span>任务 ID：{item.task.id}</span>
+                  <span>视频：{item.task.videoName}</span>
+                  <span>画质：{item.task.quality}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <form className="chat__form" onSubmit={handleChatSubmit}>
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(event) => setChatInput(event.target.value)}
+            placeholder="例如：视频=demo.mp4; 片段=00:00:05-00:00:30; 画质=medium"
+            disabled={chatLoading}
+          />
+          <button
+            type="submit"
+            className="button button--primary"
+            disabled={chatLoading || !chatInput.trim()}
+          >
+            {chatLoading ? '发送中...' : '发送'}
+          </button>
+        </form>
+      </section>
 
       {generalConfig && (
         <section className="card">
@@ -403,6 +513,14 @@ function App() {
       </section>
     </div>
   );
+}
+
+function formatTime(value: string) {
+  return new Intl.DateTimeFormat('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(new Date(value));
 }
 
 function formatDate(value: string) {

@@ -29,6 +29,94 @@
   gap: 1.5rem;
 }
 
+.chat {
+  gap: 1rem;
+}
+
+.chat__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chat__header p {
+  margin: 0;
+  color: #5d6b7d;
+}
+
+.chat__hint {
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.chat__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.chat-bubble {
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.chat-bubble--user {
+  margin-left: auto;
+  background: linear-gradient(135deg, #4c6ef5, #5563de);
+  color: #fff;
+  max-width: 75%;
+}
+
+.chat-bubble--assistant {
+  margin-right: auto;
+  background: #f8fafc;
+  color: #1f2933;
+  max-width: 85%;
+}
+
+.chat-bubble__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.chat-bubble__task {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.07);
+}
+
+.chat__form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat__form input {
+  flex: 1;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #d2dae3;
+  font-size: 0.95rem;
+}
+
+.chat__form input:disabled {
+  background: #f5f7fb;
+}
+
 .card__header {
   display: flex;
   justify-content: space-between;

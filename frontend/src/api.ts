@@ -1,4 +1,5 @@
 import type {
+  ChatResponse,
   CreateTaskPayload,
   GeneralConfig,
   Quality,
@@ -47,6 +48,11 @@ export const api = {
     }),
   updateTaskStatus: (id: string, action: TaskStatusAction) =>
     request<Task>(`/api/tasks/${id}/${action}`, { method: 'POST' }),
+  sendChatMessage: (message: string) =>
+    request<ChatResponse>('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    }),
 };
 
 export type TaskStatusAction =

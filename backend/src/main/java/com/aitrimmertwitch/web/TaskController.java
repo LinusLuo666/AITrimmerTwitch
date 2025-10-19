@@ -17,6 +17,7 @@ import com.aitrimmertwitch.model.VideoEditTask;
 import com.aitrimmertwitch.service.TaskService;
 import com.aitrimmertwitch.web.dto.CreateTaskRequest;
 import com.aitrimmertwitch.web.dto.TaskView;
+import com.aitrimmertwitch.web.mapper.TaskViewMapper;
 
 import jakarta.validation.Valid;
 
@@ -27,54 +28,51 @@ public class TaskController {
 
 	private final TaskService taskService;
 
-	public TaskController(TaskService taskService) {
+	private final TaskViewMapper mapper;
+
+	public TaskController(TaskService taskService, TaskViewMapper mapper) {
 		this.taskService = taskService;
+		this.mapper = mapper;
 	}
 
 	@PostMapping
 	public ResponseEntity<TaskView> createTask(@Valid @RequestBody CreateTaskRequest request) {
 		VideoEditTask task = taskService.createTask(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(toView(task));
+		return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toView(task));
 	}
 
 	@GetMapping
 	public List<TaskView> listTasks() {
-		return taskService.listTasks().stream().map(this::toView).toList();
+		return taskService.listTasks().stream().map(mapper::toView).toList();
 	}
 
 	@PostMapping("/{id}/approve")
 	public TaskView approve(@PathVariable UUID id) {
-		return toView(taskService.approve(id));
+		return mapper.toView(taskService.approve(id));
 	}
 
 	@PostMapping("/{id}/pause")
 	public TaskView pause(@PathVariable UUID id) {
-		return toView(taskService.pause(id));
+		return mapper.toView(taskService.pause(id));
 	}
 
 	@PostMapping("/{id}/cancel")
 	public TaskView cancel(@PathVariable UUID id) {
-		return toView(taskService.cancel(id));
+		return mapper.toView(taskService.cancel(id));
 	}
 
 	@PostMapping("/{id}/running")
 	public TaskView markRunning(@PathVariable UUID id) {
-		return toView(taskService.markRunning(id));
+		return mapper.toView(taskService.markRunning(id));
 	}
 
 	@PostMapping("/{id}/completed")
 	public TaskView markCompleted(@PathVariable UUID id) {
-		return toView(taskService.markCompleted(id));
+		return mapper.toView(taskService.markCompleted(id));
 	}
 
 	@PostMapping("/{id}/failed")
 	public TaskView markFailed(@PathVariable UUID id) {
-		return toView(taskService.markFailed(id));
-	}
-
-	private TaskView toView(VideoEditTask task) {
-		return new TaskView(task.getId(), task.getSourceVideoName(), task.getStatus(), task.getSegments(),
-				task.getQualityProfile(), task.getOutputFileName(), task.getExecutionPreview(), task.getCreatedAt(),
-				task.getUpdatedAt());
+		return mapper.toView(taskService.markFailed(id));
 	}
 }

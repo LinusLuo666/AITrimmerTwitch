@@ -45,3 +45,8 @@ export interface CreateTaskPayload {
   autoApprove: boolean;
   segments: TaskSegment[];
 }
+
+export interface ChatResponse {
+  reply: string;
+  task?: Task | null;
+}
